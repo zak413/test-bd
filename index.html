@@ -28,7 +28,7 @@
 <script>
   const msalConfig = {
     auth: {
-      clientId: '58deb25d-3881-4c76-863b-70e3fcb1739b', // ✉️ Remplace par l'ID de ton app Entra ID
+      clientId: 'TON_CLIENT_ID', // ✉️ Remplace par l'ID de ton app Entra ID
       authority: 'https://login.microsoftonline.com/common',
       redirectUri: window.location.href
     }
@@ -37,8 +37,7 @@
   const graphScopes = [
     'Directory.ReadWrite.All',
     'RoleManagement.ReadWrite.Directory',
-    'Application.Read.All',
-    'Application.ReadWrite.All'
+    'Application.Read.All'
   ];
 
   const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -84,15 +83,11 @@
     };
 
     try {
-      log(`Recherche de l'application "${appName}"...`);
-      const appData = await graphRequest(`${baseUrl}/applications?$filter=displayName eq '${encodeURIComponent(appName)}'`);
-      if (!appData.value.length) throw new Error(`Application non trouvée.`);
-      const app = appData.value[0];
-
-      log('Recherche du service principal...');
-      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=appId eq '${app.appId}'`);
-      if (!spData.value.length) throw new Error('Service principal introuvable.');
+      log(`Recherche de l'application d'entreprise "${appName}"...`);
+      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${encodeURIComponent(appName)}'`);
+      if (!spData.value.length) throw new Error(`Application non trouvée.`);
       const sp = spData.value[0];
+      log(`Service principal trouvé : ${sp.id}`);
 
       log('Recherche du rôle User Administrator...');
       let roles = await graphRequest(`${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
