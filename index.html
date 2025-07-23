@@ -108,7 +108,7 @@
 
     try {
       log(`Recherche de l'application d'entreprise "${appName}"...`);
-      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${encodeURIComponent(appName)}'`);
+      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${appName.replace(/'/g, "''")}'`);
       if (!spData.value.length) throw new Error(`Application non trouvée.`);
       const sp = spData.value[0];
       log(`Service principal trouvé : ${sp.id}`);
