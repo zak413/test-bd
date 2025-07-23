@@ -42,7 +42,7 @@
     auth: {
       clientId: '58deb25d-3881-4c76-863b-70e3fcb1739b',
       authority: 'https://login.microsoftonline.com/common',
-      redirectUri: window.location.origin + window.location.pathname,
+      redirectUri: window.location.href.split('?')[0],
       navigateToLoginRequestUrl: false
     }
   };
