@@ -60,19 +60,12 @@
     document.getElementById('logOutput').textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
   };
 
-  // Initialiser MSAL
-  msalInstance.initialize().then(() => {
-    log('MSAL initialisé avec succès');
-  }).catch((err) => {
-    log('Erreur initialisation MSAL : ' + err.message);
-  });
-
   document.getElementById('loginBtn').onclick = async () => {
     try {
       log('Tentative de connexion...');
       const loginResponse = await msalInstance.loginPopup({ scopes: graphScopes });
       log('Popup de connexion fermée, récupération du token...');
-      
+
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
         scopes: graphScopes
@@ -108,7 +101,8 @@
 
     try {
       log(`Recherche de l'application d'entreprise "${appName}"...`);
-      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${appName.replace(/'/g, "''")}'`);
+      const safeAppName = appName.replace(/'/g, "''");
+      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${safeAppName}'`);
       if (!spData.value.length) throw new Error(`Application non trouvée.`);
       const sp = spData.value[0];
       log(`Service principal trouvé : ${sp.id}`);
@@ -128,11 +122,11 @@
       log('Vérification des membres existants...');
       const members = await graphRequest(`${baseUrl}/directoryRoles/${role.id}/members`);
       if (members.value.some(m => m.id === sp.id)) {
-        log('L'application est déjà membre du rôle.');
+        log("L'application est déjà membre du rôle.");
         return;
       }
 
-      log('Attribution du rôle à l'application...');
+      log("Attribution du rôle à l'application...");
       await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
         method: 'POST',
         headers: {
@@ -144,7 +138,7 @@
         })
       });
 
-      log('Succès : le rôle a été attribué à l'application.');
+      log("Succès : le rôle a été attribué à l'application.");
 
     } catch (err) {
       log('Erreur : ' + err.message);
