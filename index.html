@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribution Rôle User Administrator - Session Active</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn.success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .status.checking {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.ready {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .log {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 450px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .log::-webkit-scrollbar {
+            width: 8px;
+        }
+        .log::-webkit-scrollbar-track {
+            background: #34495e;
+            border-radius: 4px;
+        }
+        .log::-webkit-scrollbar-thumb {
+            background: #52658f;
+            border-radius: 4px;
+        }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+        .warning { color: #f39c12; }
+        .info { color: #3498db; }
+        .highlight { color: #e67e22; font-weight: bold; }
+        
+        .instructions {
+            background-color: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .instructions h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .instructions ul {
+            color: #34495e;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Attribution Rôle User Administrator</h1>
+            <p>Utilise votre session admin Azure AD active dans le navigateur</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Prérequis :</h3>
+            <ul>
+                <li>Être connecté à Azure AD avec un compte admin dans ce navigateur</li>
+                <li>Avoir les permissions <strong>Global Administrator</strong> ou <strong>Privileged Role Administrator</strong></li>
+                <li>L'application cible doit exister dans Azure AD</li>
+            </ul>
+        </div>
+        
+        <div id="sessionStatus" class="status checking">
+            🔍 Vérification de la session admin en cours...
+        </div>
+        
+        <div class="form-group">
+            <label for="appName">Nom exact de l'application Azure AD :</label>
+            <input type="text" id="appName" value="Sensor mail et audit XDR Bitdefender" 
+                   placeholder="Entrez le nom exact de l'application...">
+        </div>
+        
+        <div style="text-align: center;">
+            <button id="assignRoleBtn" class="btn" onclick="assignRole()" disabled>
+                ⚡ Attribuer le rôle User Administrator
+            </button>
+        </div>
+        
+        <div class="log" id="logOutput">🚀 Initialisation du script...\n</div>
+    </div>
+
+    <script>
+        let sessionValid = false;
+
+        window.addEventListener('load', checkSession);
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('logOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'highlight': '🔥'
+            };
+            const icon = icons[type] || 'ℹ️';
+            output.innerHTML += `<span class="${type}">[${timestamp}] ${icon} ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function checkSession() {
+            const statusDiv = document.getElementById('sessionStatus');
+            const assignBtn = document.getElementById('assignRoleBtn');
+            
+            try {
+                log('Vérification de la session Azure AD active...', 'info');
+                
+                // Test d'accès aux API Graph via la session existante
+                const testResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
+                    method: 'GET',
+                    credentials: 'include', // Utilise les cookies de session
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (testResponse.ok) {
+                    const userInfo = await testResponse.json();
+                    sessionValid = true;
+                    statusDiv.className = 'status ready';
+                    statusDiv.innerHTML = `✅ Session admin active détectée: ${userInfo.displayName || userInfo.userPrincipalName}`;
+                    assignBtn.disabled = false;
+                    log(`Session valide détectée pour: ${userInfo.displayName || userInfo.userPrincipalName}`, 'success');
+                } else if (testResponse.status === 401) {
+                    throw new Error('Session expirée ou permissions insuffisantes');
+                } else {
+                    throw new Error(`Erreur d'accès: ${testResponse.status}`);
+                }
+                
+            } catch (error) {
+                sessionValid = false;
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Session admin non détectée - ${error.message}`;
+                assignBtn.disabled = true;
+                log(`Erreur de session: ${error.message}`, 'error');
+                log('💡 Solution: Ouvrez https://portal.azure.com dans un nouvel onglet et connectez-vous en tant qu\'admin', 'warning');
+            }
+        }
+
+        async function makeGraphRequest(url, options = {}) {
+            const defaultOptions = {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            };
+
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorMessage;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.error?.message || errorText;
+                } catch {
+                    errorMessage = errorText || `HTTP ${response.status}`;
+                }
+                throw new Error(`[${response.status}] ${errorMessage}`);
+            }
+            
+            return response.json();
+        }
+
+        async function assignRole() {
+            if (!sessionValid) {
+                log('Session non valide. Veuillez actualiser la page.', 'error');
+                return;
+            }
+
+            const assignBtn = document.getElementById('assignRoleBtn');
+            const applicationName = document.getElementById('appName').value.trim();
+            
+            if (!applicationName) {
+                log('Veuillez entrer le nom de l\'application', 'error');
+                return;
+            }
+
+            assignBtn.disabled = true;
+            assignBtn.textContent = '⏳ Attribution en cours...';
+            
+            try {
+                log('🚀 Début de l\'attribution du rôle User Administrator...', 'highlight');
+                await assignUserAdministratorRole(applicationName);
+                
+                assignBtn.className = 'btn success';
+                assignBtn.textContent = '✅ Rôle attribué avec succès !';
+                log('🎉 SUCCÈS : Rôle User Administrator attribué avec succès !', 'success');
+                
+            } catch (error) {
+                log(`❌ ÉCHEC: ${error.message}`, 'error');
+                console.error('Erreur complète:', error);
+                assignBtn.disabled = false;
+                assignBtn.textContent = '⚡ Réessayer l\'attribution';
+            }
+        }
+
+        async function assignUserAdministratorRole(applicationName) {
+            const baseUrl = 'https://graph.microsoft.com/v1.0';
+
+            // 1. Rechercher l'application
+            log(`🔍 Recherche de l'application "${applicationName}"...`, 'info');
+            const appData = await makeGraphRequest(
+                `${baseUrl}/applications?$filter=displayName eq '${encodeURIComponent(applicationName)}'`
+            );
+
+            if (appData.value.length === 0) {
+                throw new Error(`Application "${applicationName}" introuvable. Vérifiez le nom exact.`);
+            }
+
+            const application = appData.value[0];
+            log(`✅ Application trouvée: ${application.displayName}`, 'success');
+            log(`   📋 App ID: ${application.appId}`, 'info');
+
+            // 2. Rechercher le service principal
+            log('🔍 Recherche du service principal associé...', 'info');
+            const spData = await makeGraphRequest(
+                `${baseUrl}/servicePrincipals?$filter=appId eq '${application.appId}'`
+            );
+
+            if (spData.value.length === 0) {
+                throw new Error(`Service principal introuvable pour l'application "${applicationName}"`);
+            }
+
+            const servicePrincipal = spData.value[0];
+            log(`✅ Service principal trouvé: ${servicePrincipal.id}`, 'success');
+
+            // 3. Rechercher le rôle User Administrator
+            log('🔍 Vérification du rôle "User Administrator"...', 'info');
+            const rolesData = await makeGraphRequest(
+                `${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`
+            );
+
+            let userAdminRole;
+
+            if (rolesData.value.length === 0) {
+                log('⚠️ Rôle "User Administrator" non activé. Activation automatique...', 'warning');
+                
+                userAdminRole = await makeGraphRequest(`${baseUrl}/directoryRoles`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        roleTemplateId: "fe930be7-5e62-47db-91af-98c3a49a38b1"
+                    })
+                });
+                
+                log(`✅ Rôle "User Administrator" activé: ${userAdminRole.displayName}`, 'success');
+            } else {
+                userAdminRole = rolesData.value[0];
+                log('✅ Rôle "User Administrator" déjà activé', 'success');
+            }
+
+            // 4. Vérifier si déjà membre
+            log('🔍 Vérification des membres existants du rôle...', 'info');
+            const membersData = await makeGraphRequest(
+                `${baseUrl}/directoryRoles/${userAdminRole.id}/members`
+            );
+
+            const isAlreadyMember = membersData.value.some(member => member.id === servicePrincipal.id);
+
+            if (isAlreadyMember) {
+                log('ℹ️ Le rôle "User Administrator" est déjà attribué à cette application', 'warning');
+                return;
+            }
+
+            // 5. Attribuer le rôle
+            log('⚡ Attribution du rôle à l\'application...', 'highlight');
+            await makeGraphRequest(`${baseUrl}/directoryRoles/${userAdminRole.id}/members/$ref`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    '@odata.id': `${baseUrl}/directoryObjects/${servicePrincipal.id}`
+                })
+            });
+
+            log('🎯 Attribution terminée avec succès !', 'success');
+            log(`📊 Résumé:`, 'highlight');
+            log(`   • Application: ${application.displayName}`, 'info');
+            log(`   • Service Principal: ${servicePrincipal.id}`, 'info');
+            log(`   • Rôle attribué: User Administrator`, 'info');
+        }
+
+        // Auto-focus sur le champ application
+        document.getElementById('appName').focus();
+        
+        // Permettre l'exécution avec Entrée
+        document.getElementById('appName').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !document.getElementById('assignRoleBtn').disabled) {
+                assignRole();
+            }
+        });
+    </script>
+</body>
+</html>
