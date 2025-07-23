@@ -6,233 +6,78 @@
   <title>Attribution Rôle User Administrator</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <style>
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      max-width: 900px; 
-      margin: auto; 
-      padding: 20px; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .header h1 {
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
-    .header p {
-      color: #7f8c8d;
-      font-size: 16px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #ecf0f1;
-      border-radius: 6px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-      box-sizing: border-box;
-    }
-    .form-group input:focus {
-      outline: none;
-      border-color: #3498db;
-    }
-    .log { 
-      white-space: pre-wrap; 
-      background: #2c3e50; 
-      color: #ecf0f1;
-      padding: 20px; 
-      border-radius: 8px; 
-      margin-top: 20px; 
-      font-family: 'Consolas', 'Monaco', monospace; 
-      font-size: 14px;
-      max-height: 400px;
-      overflow-y: auto;
-      box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
-    }
-    .btn { 
-      background: linear-gradient(45deg, #3498db, #2980b9);
-      color: white;
-      padding: 15px 30px; 
-      font-weight: bold; 
-      border: none; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 16px;
-      margin: 10px 5px;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-    }
-    .btn:disabled { 
-      background: #bdc3c7; 
-      cursor: not-allowed; 
-      transform: none;
-      box-shadow: none;
-    }
-    .btn.success {
-      background: linear-gradient(45deg, #27ae60, #2ecc71);
-      box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-    }
-    .status {
-      margin: 20px 0;
-      padding: 15px;
-      border-radius: 8px;
-      font-weight: 600;
-      text-align: center;
-    }
-    .status.info {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-    .github-info {
-      background-color: #f6f8fa;
-      border: 1px solid #d1d9e0;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-    .github-info strong {
-      color: #24292f;
-    }
+    body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+    .log { white-space: pre-wrap; background: #f5f5f5; padding: 15px; border-radius: 8px; margin-top: 20px; font-family: monospace; }
+    .btn { padding: 10px 20px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🔐 Attribution Rôle User Administrator</h1>
-    </div>
+  <h1>🔐 Attribution Rôle User Administrator</h1>
 
+  <label for="appName">Nom exact de l'application Azure AD :</label>
+  <input type="text" id="appName" value="Sensor mail et audit XDR Bitdefender" style="width:100%; padding:10px;">
 
-
-    <div class="status info">
-      <strong>ℹ️ Instructions :</strong> Cliquez sur "Se connecter à Azure" puis sur "Attribuer le rôle" une fois connecté.
-    </div>
-
-    <div class="form-group">
-      <label for="appName">Nom exact de l'application Azure AD :</label>
-      <input type="text" id="appName" value="Sensor mail et audit XDR Bitdefender">
-    </div>
-
-    <div style="text-align: center; margin-top: 20px;">
-      <button id="loginBtn" class="btn">🔐 Se connecter à Azure</button>
-      <button id="assignRoleBtn" class="btn" disabled>⚡ Attribuer le rôle User Administrator</button>
-    </div>
-
-    <div class="log" id="logOutput">[INFO] Page chargée...</div>
+  <div style="margin-top:20px">
+    <button id="loginBtn" class="btn">Se connecter à Azure</button>
+    <button id="assignRoleBtn" class="btn" disabled>Attribuer le rôle User Administrator</button>
   </div>
 
+  <div class="log" id="logOutput">[INFO] Page chargée...</div>
+
 <script>
-  const msalConfig = {
-    auth: {
-      clientId: '58deb25d-3881-4c76-863b-70e3fcb1739b',
-      authority: 'https://login.microsoftonline.com/6860fe23-4c83-4fdf-99b5-f82a4b386176',
-      redirectUri: 'https://zak413.github.io/test-bd/',
-      navigateToLoginRequestUrl: false // Empêche la redirection avec paramètres
-    },
-    cache: {
-      cacheLocation: 'localStorage',
-      storeAuthStateInCookie: false
-    },
-    system: {
-      allowNativeBroker: false
-    }
-  };
-
-  const graphScopes = [
-    'Directory.ReadWrite.All',
-    'Application.Read.All',
-    'User.Read'
-  ];
-
-  const msalInstance = new msal.PublicClientApplication(msalConfig);
-  let accessToken = null;
-
-  const log = (msg) => {
-    const timestamp = new Date().toLocaleTimeString();
-    document.getElementById('logOutput').textContent += `\n[${timestamp}] ${msg}`;
-    // Auto-scroll vers le bas
-    const logElement = document.getElementById('logOutput');
-    logElement.scrollTop = logElement.scrollHeight;
-  };
-
   // Nettoyer l'URL au chargement
   window.addEventListener('load', () => {
-    // Supprimer les paramètres admin_consent de l'URL
     const url = new URL(window.location);
     if (url.searchParams.has('admin_consent') || url.searchParams.has('tenant')) {
       url.searchParams.delete('admin_consent');
       url.searchParams.delete('tenant');
       url.searchParams.delete('state');
       url.searchParams.delete('session_state');
-      // Rediriger vers l'URL propre
       window.history.replaceState({}, document.title, url.toString());
-      log('✅ URL nettoyée des paramètres admin_consent');
     }
-    log('🚀 Page chargée correctement');
-    log('📍 GitHub Pages: https://zak413.github.io/test-bd/');
   });
+
+  const msalConfig = {
+    auth: {
+      clientId: '58deb25d-3881-4c76-863b-70e3fcb1739b',
+      authority: 'https://login.microsoftonline.com/common',
+      redirectUri: window.location.origin + window.location.pathname,
+      navigateToLoginRequestUrl: false
+    }
+  };
+
+  const graphScopes = [
+    'Directory.ReadWrite.All',
+    'RoleManagement.ReadWrite.Directory',
+    'Application.Read.All'
+  ];
+
+  const msalInstance = new msal.PublicClientApplication(msalConfig);
+  let accessToken = null;
+
+  const log = (msg) => {
+    document.getElementById('logOutput').textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
+  };
 
   document.getElementById('loginBtn').onclick = async () => {
     try {
-      log('🔐 Tentative de connexion à Azure AD...');
-      
-      const loginRequest = {
-        scopes: graphScopes,
-        prompt: 'select_account'
-      };
-
-      const loginResponse = await msalInstance.loginPopup(loginRequest);
-      
-      const tokenRequest = {
+      const loginResponse = await msalInstance.loginPopup({ scopes: graphScopes });
+      const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
-        scopes: graphScopes,
-        forceRefresh: false
-      };
-
-      const tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+        scopes: graphScopes
+      });
       accessToken = tokenResponse.accessToken;
-      
-      log(`✅ Connecté avec succès : ${loginResponse.account.username}`);
-      log(`📋 Tenant : ${loginResponse.account.tenantId}`);
-      
+      log(`Connecté avec succès : ${loginResponse.account.username}`);
       document.getElementById('assignRoleBtn').disabled = false;
-      document.getElementById('loginBtn').style.display = 'none';
-      
     } catch (err) {
-      log('❌ Erreur de connexion : ' + err.message);
-      console.error('Détails de l\'erreur:', err);
+      log('Erreur de connexion : ' + err.message);
     }
   };
 
   document.getElementById('assignRoleBtn').onclick = async () => {
     const appName = document.getElementById('appName').value.trim();
-    if (!accessToken || !appName) {
-      log('❌ Token manquant ou nom d\'application vide');
-      return;
-    }
+    if (!accessToken || !appName) return;
 
     const baseUrl = 'https://graph.microsoft.com/v1.0';
 
@@ -246,59 +91,38 @@
           ...options.headers
         }
       });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`[${res.status}] ${errorText}`);
-      }
+      if (!res.ok) throw new Error(`[${res.status}] ${await res.text()}`);
       return res.json();
     };
 
     try {
-      const assignBtn = document.getElementById('assignRoleBtn');
-      assignBtn.disabled = true;
-      assignBtn.textContent = '⏳ Attribution en cours...';
-      
-      log(`🔍 Recherche de l'application "${appName}"...`);
-      
-      // Rechercher par displayName dans les service principals (applications d'entreprise)
+      log(`Recherche de l'application d'entreprise "${appName}"...`);
       const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${encodeURIComponent(appName)}'`);
-      
-      if (!spData.value.length) {
-        throw new Error(`Application "${appName}" non trouvée dans les applications d'entreprise.`);
-      }
-      
+      if (!spData.value.length) throw new Error(`Application non trouvée.`);
       const sp = spData.value[0];
-      log(`✅ Service principal trouvé : ${sp.id}`);
-      log(`   📋 App ID : ${sp.appId}`);
+      log(`Service principal trouvé : ${sp.id}`);
 
-      log('🔍 Recherche du rôle User Administrator...');
+      log('Recherche du rôle User Administrator...');
       let roles = await graphRequest(`${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
       let role = roles.value[0];
 
       if (!role) {
-        log('⚠️ Activation du rôle User Administrator...');
+        log('Activation du rôle User Administrator...');
         role = await graphRequest(`${baseUrl}/directoryRoles`, {
           method: 'POST',
           body: JSON.stringify({ roleTemplateId: 'fe930be7-5e62-47db-91af-98c3a49a38b1' })
         });
-        log('✅ Rôle User Administrator activé');
-      } else {
-        log('✅ Rôle User Administrator déjà activé');
       }
 
-      log('🔍 Vérification des membres existants...');
+      log('Vérification des membres existants...');
       const members = await graphRequest(`${baseUrl}/directoryRoles/${role.id}/members`);
-      
       if (members.value.some(m => m.id === sp.id)) {
-        log('ℹ️ L\'application est déjà membre du rôle User Administrator.');
-        assignBtn.textContent = '✅ Déjà attribué';
-        assignBtn.className = 'btn success';
+        log('L'application est déjà membre du rôle.');
         return;
       }
 
-      log('⚡ Attribution du rôle à l\'application...');
-      const assignResponse = await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
+      log('Attribution du rôle à l'application...');
+      await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -309,45 +133,12 @@
         })
       });
 
-      if (!assignResponse.ok) {
-        const errorText = await assignResponse.text();
-        throw new Error(`Erreur attribution [${assignResponse.status}]: ${errorText}`);
-      }
-
-      log('🎉 SUCCÈS : Le rôle User Administrator a été attribué à l\'application !');
-      log(`📊 Résumé :`);
-      log(`   • Application : ${sp.displayName}`);
-      log(`   • Service Principal ID : ${sp.id}`);
-      log(`   • Rôle attribué : User Administrator`);
-      
-      assignBtn.textContent = '✅ Rôle attribué avec succès !';
-      assignBtn.className = 'btn success';
+      log('Succès : le rôle a été attribué à l'application.');
 
     } catch (err) {
-      log('❌ Erreur : ' + err.message);
-      const assignBtn = document.getElementById('assignRoleBtn');
-      assignBtn.disabled = false;
-      assignBtn.textContent = '🔄 Réessayer l\'attribution';
-      console.error('Erreur complète:', err);
-      
-      // Suggestions d'aide
-      if (err.message.includes('403')) {
-        log('💡 Suggestion : Vérifiez que vous avez les permissions administrateur');
-      } else if (err.message.includes('404')) {
-        log('💡 Suggestion : Vérifiez le nom exact de l\'application');
-      }
+      log('Erreur : ' + err.message);
     }
   };
-
-  // Auto-focus sur le champ application
-  document.getElementById('appName').focus();
-  
-  // Permettre l'exécution avec Entrée
-  document.getElementById('appName').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter' && !document.getElementById('assignRoleBtn').disabled) {
-      document.getElementById('assignRoleBtn').click();
-    }
-  });
 </script>
 </body>
 </html>
