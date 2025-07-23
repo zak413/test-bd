@@ -60,9 +60,19 @@
     document.getElementById('logOutput').textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
   };
 
+  // Initialiser MSAL
+  msalInstance.initialize().then(() => {
+    log('MSAL initialisé avec succès');
+  }).catch((err) => {
+    log('Erreur initialisation MSAL : ' + err.message);
+  });
+
   document.getElementById('loginBtn').onclick = async () => {
     try {
+      log('Tentative de connexion...');
       const loginResponse = await msalInstance.loginPopup({ scopes: graphScopes });
+      log('Popup de connexion fermée, récupération du token...');
+      
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
         scopes: graphScopes
@@ -72,6 +82,7 @@
       document.getElementById('assignRoleBtn').disabled = false;
     } catch (err) {
       log('Erreur de connexion : ' + err.message);
+      console.error('Détail erreur:', err);
     }
   };
 
