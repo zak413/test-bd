@@ -298,7 +298,7 @@
       }
 
       log('⚡ Attribution du rôle à l\'application...');
-      await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
+      const assignResponse = await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -308,6 +308,11 @@
           '@odata.id': `${baseUrl}/directoryObjects/${sp.id}`
         })
       });
+
+      if (!assignResponse.ok) {
+        const errorText = await assignResponse.text();
+        throw new Error(`Erreur attribution [${assignResponse.status}]: ${errorText}`);
+      }
 
       log('🎉 SUCCÈS : Le rôle User Administrator a été attribué à l\'application !');
       log(`📊 Résumé :`);
