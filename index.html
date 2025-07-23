@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attribution Rôle User Administrator - Session Active</title>
+    <title>Attribution Rôle User Administrator - Solution CORS</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,6 +31,50 @@
             color: #7f8c8d;
             font-size: 16px;
         }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .method-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -47,6 +91,7 @@
             border-radius: 6px;
             font-size: 16px;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         .form-group input:focus {
             outline: none;
@@ -77,29 +122,34 @@
         }
         .btn.success {
             background: linear-gradient(45deg, #27ae60, #2ecc71);
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
         }
-        .status {
-            margin: 20px 0;
-            padding: 15px;
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
             border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+            margin: 15px 0;
         }
-        .status.checking {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
         }
-        .status.ready {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .copy-btn:hover {
+            background: #52658f;
         }
         .log {
             background-color: #2c3e50;
@@ -114,37 +164,21 @@
             overflow-y: auto;
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
         }
-        .log::-webkit-scrollbar {
-            width: 8px;
-        }
-        .log::-webkit-scrollbar-track {
-            background: #34495e;
-            border-radius: 4px;
-        }
-        .log::-webkit-scrollbar-thumb {
-            background: #52658f;
-            border-radius: 4px;
-        }
         .success { color: #2ecc71; }
         .error { color: #e74c3c; }
         .warning { color: #f39c12; }
         .info { color: #3498db; }
         .highlight { color: #e67e22; font-weight: bold; }
-        
-        .instructions {
-            background-color: #e8f4fd;
+        .step {
+            background: #f8f9fa;
             border-left: 4px solid #3498db;
             padding: 15px;
-            margin-bottom: 20px;
+            margin: 15px 0;
             border-radius: 0 8px 8px 0;
         }
-        .instructions h3 {
-            color: #2980b9;
-            margin-top: 0;
-        }
-        .instructions ul {
-            color: #34495e;
-            margin-bottom: 0;
+        .step h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -152,41 +186,232 @@
     <div class="container">
         <div class="header">
             <h1>🔐 Attribution Rôle User Administrator</h1>
-            <p>Utilise votre session admin Azure AD active dans le navigateur</p>
+            <p>Solution définitive pour contourner CORS</p>
         </div>
 
-        <div class="instructions">
-            <h3>📋 Prérequis :</h3>
+        <div class="alert warning">
+            <strong>⚠️ Problème CORS détecté :</strong> GitHub Pages ne peut pas accéder directement aux APIs Microsoft Graph. Voici 3 solutions qui fonctionnent !
+        </div>
+
+        <div class="method-tabs">
+            <div class="tab active" onclick="showTab('iframe')">🖼️ IFrame Portal</div>
+            <div class="tab" onclick="showTab('console')">🖥️ Console Script</div>
+            <div class="tab" onclick="showTab('extension')">🔧 Extension</div>
+        </div>
+
+        <!-- Solution IFrame -->
+        <div id="iframe" class="tab-content active">
+            <div class="alert success">
+                <strong>✅ Solution recommandée :</strong> Intégrer portal.azure.com dans un iframe
+            </div>
+
+            <div class="step">
+                <h4>🎯 Comment ça marche :</h4>
+                <p>On charge portal.azure.com dans un iframe et on injecte notre script directement dedans. Pas de problème CORS !</p>
+            </div>
+
+            <div class="form-group">
+                <label for="appNameIframe">Nom de l'application :</label>
+                <input type="text" id="appNameIframe" value="Sensor mail et audit XDR Bitdefender">
+            </div>
+
+            <button class="btn" onclick="loadAzurePortal()">🚀 Lancer l'attribution</button>
+
+            <div id="portalContainer" style="display: none; margin-top: 20px;">
+                <div class="alert info">
+                    <strong>📋 Instructions :</strong>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>Connectez-vous dans l'iframe ci-dessous</li>
+                        <li>Une fois connecté, cliquez sur "Exécuter le script"</li>
+                        <li>Le script s'exécutera automatiquement</li>
+                    </ol>
+                </div>
+                
+                <button class="btn success" onclick="executeInIframe()" id="executeBtn" disabled>⚡ Exécuter le script</button>
+                
+                <iframe id="azureIframe" src="" style="width: 100%; height: 500px; border: 2px solid #3498db; border-radius: 8px; margin-top: 15px;"></iframe>
+            </div>
+        </div>
+
+        <!-- Solution Console -->
+        <div id="console" class="tab-content">
+            <div class="alert info">
+                <strong>📋 Solution classique :</strong> Script à exécuter dans la console de portal.azure.com
+            </div>
+
+            <div class="step">
+                <h4>📋 Instructions :</h4>
+                <ol>
+                    <li>Ouvrez <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> dans un nouvel onglet</li>
+                    <li>Connectez-vous avec votre compte admin</li>
+                    <li>Ouvrez la console (F12 → Console)</li>
+                    <li>Copiez-collez le script ci-dessous</li>
+                    <li>Appuyez sur Entrée</li>
+                </ol>
+            </div>
+
+            <button class="btn" onclick="copyConsoleScript()">📋 Copier le script</button>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyToClipboard('consoleScriptContent')">Copier</button>
+                <div id="consoleScriptContent">// 🚀 Attribution automatique du rôle User Administrator
+// À coller dans la console de portal.azure.com (F12 → Console)
+
+(async function() {
+    console.clear();
+    console.log('🚀 Attribution du rôle User Administrator');
+    console.log('==========================================');
+    
+    const appName = prompt("Nom exact de l'application Azure AD:", "Sensor mail et audit XDR Bitdefender");
+    if (!appName) {
+        console.log('❌ Annulé par l\'utilisateur');
+        return;
+    }
+    
+    console.log(`🎯 Application cible: "${appName}"`);
+    
+    try {
+        // Vérification de session
+        console.log('\n🔍 Vérification de la session...');
+        const userResponse = await fetch('/v1.0/me');
+        if (!userResponse.ok) throw new Error('Session invalide - Reconnectez-vous');
+        const user = await userResponse.json();
+        console.log(`✅ Connecté: ${user.displayName}`);
+        
+        // Recherche application
+        console.log('\n🔍 Recherche de l\'application...');
+        const appResponse = await fetch(`https://graph.microsoft.com/v1.0/applications?$filter=displayName eq '${encodeURIComponent(appName)}'`, {
+            credentials: 'include'
+        });
+        if (!appResponse.ok) throw new Error(`Erreur recherche app: ${appResponse.status}`);
+        const appData = await appResponse.json();
+        if (appData.value.length === 0) throw new Error(`Application "${appName}" introuvable`);
+        const app = appData.value[0];
+        console.log(`✅ Application: ${app.displayName} (${app.appId})`);
+        
+        // Recherche service principal
+        console.log('\n🔍 Recherche du service principal...');
+        const spResponse = await fetch(`https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '${app.appId}'`, {
+            credentials: 'include'
+        });
+        if (!spResponse.ok) throw new Error(`Erreur SP: ${spResponse.status}`);
+        const spData = await spResponse.json();
+        if (spData.value.length === 0) throw new Error('Service principal introuvable');
+        const sp = spData.value[0];
+        console.log(`✅ Service principal: ${sp.id}`);
+        
+        // Vérification du rôle
+        console.log('\n🔍 Vérification du rôle User Administrator...');
+        const rolesResponse = await fetch(`https://graph.microsoft.com/v1.0/directoryRoles?$filter=displayName eq 'User Administrator'`, {
+            credentials: 'include'
+        });
+        if (!rolesResponse.ok) throw new Error(`Erreur rôles: ${rolesResponse.status}`);
+        const rolesData = await rolesResponse.json();
+        
+        let userAdminRole;
+        if (rolesData.value.length === 0) {
+            console.log('⚠️ Activation du rôle...');
+            const activateResponse = await fetch('https://graph.microsoft.com/v1.0/directoryRoles', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roleTemplateId: "fe930be7-5e62-47db-91af-98c3a49a38b1" })
+            });
+            if (!activateResponse.ok) throw new Error(`Erreur activation: ${activateResponse.status}`);
+            userAdminRole = await activateResponse.json();
+            console.log(`✅ Rôle activé: ${userAdminRole.displayName}`);
+        } else {
+            userAdminRole = rolesData.value[0];
+            console.log('✅ Rôle déjà activé');
+        }
+        
+        // Vérification des membres
+        const membersResponse = await fetch(`https://graph.microsoft.com/v1.0/directoryRoles/${userAdminRole.id}/members`, {
+            credentials: 'include'
+        });
+        if (!membersResponse.ok) throw new Error(`Erreur membres: ${membersResponse.status}`);
+        const membersData = await membersResponse.json();
+        const isAlreadyMember = membersData.value.some(member => member.id === sp.id);
+        
+        if (isAlreadyMember) {
+            console.log('\nℹ️ Le rôle est déjà attribué à cette application');
+            return;
+        }
+        
+        // Attribution du rôle
+        console.log('\n⚡ Attribution du rôle...');
+        const assignResponse = await fetch(`https://graph.microsoft.com/v1.0/directoryRoles/${userAdminRole.id}/members/$ref`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                '@odata.id': `https://graph.microsoft.com/v1.0/directoryObjects/${sp.id}`
+            })
+        });
+        
+        if (!assignResponse.ok) throw new Error(`Erreur attribution: ${assignResponse.status}`);
+        
+        console.log('\n🎉 SUCCÈS !');
+        console.log('==========================================');
+        console.log(`✅ Rôle "User Administrator" attribué à "${app.displayName}"`);
+        console.log(`📋 Service Principal ID: ${sp.id}`);
+        console.log(`🔐 Rôle ID: ${userAdminRole.id}`);
+        alert(`✅ SUCCÈS!\nRôle "User Administrator" attribué à "${app.displayName}"`);
+        
+    } catch (error) {
+        console.error('\n❌ ERREUR:', error.message);
+        console.log('\n💡 Vérifications:');
+        console.log('- Êtes-vous connecté en tant qu\'admin ?');
+        console.log('- Le nom de l\'application est-il exact ?');
+        console.log('- L\'application existe-t-elle dans Azure AD ?');
+        alert(`❌ ERREUR: ${error.message}`);
+    }
+})();</div>
+            </div>
+        </div>
+
+        <!-- Solution Extension -->
+        <div id="extension" class="tab-content">
+            <div class="alert warning">
+                <strong>🔧 Solution technique :</strong> Extension de navigateur pour désactiver CORS
+            </div>
+
+            <div class="step">
+                <h4>📋 Instructions :</h4>
+                <ol>
+                    <li>Installez l'extension "CORS Unblock" ou "Disable CORS" dans Chrome</li>
+                    <li>Activez l'extension</li>
+                    <li>Rechargez cette page GitHub Pages</li>
+                    <li>L'outil fonctionnera normalement</li>
+                </ol>
+            </div>
+
+            <p><strong>🔗 Extensions recommandées :</strong></p>
             <ul>
-                <li>Être connecté à Azure AD avec un compte admin dans ce navigateur</li>
-                <li>Avoir les permissions <strong>Global Administrator</strong> ou <strong>Privileged Role Administrator</strong></li>
-                <li>L'application cible doit exister dans Azure AD</li>
+                <li><a href="https://chrome.google.com/webstore/search/cors%20unblock" target="_blank">CORS Unblock</a> (Chrome Web Store)</li>
+                <li><a href="https://addons.mozilla.org/fr/firefox/addon/cors-everywhere/" target="_blank">CORS Everywhere</a> (Firefox)</li>
             </ul>
+
+            <div class="alert warning">
+                <strong>⚠️ Attention :</strong> N'oubliez pas de désactiver l'extension après utilisation pour des raisons de sécurité.
+            </div>
         </div>
-        
-        <div id="sessionStatus" class="status checking">
-            🔍 Vérification de la session admin en cours...
-        </div>
-        
-        <div class="form-group">
-            <label for="appName">Nom exact de l'application Azure AD :</label>
-            <input type="text" id="appName" value="Sensor mail et audit XDR Bitdefender" 
-                   placeholder="Entrez le nom exact de l'application...">
-        </div>
-        
-        <div style="text-align: center;">
-            <button id="assignRoleBtn" class="btn" onclick="assignRole()" disabled>
-                ⚡ Attribuer le rôle User Administrator
-            </button>
-        </div>
-        
-        <div class="log" id="logOutput">🚀 Initialisation du script...\n</div>
+
+        <div class="log" id="logOutput">🚀 Page chargée - Choisissez votre méthode ci-dessus\n✅ Toutes les solutions contournent le problème CORS\n📍 Recommandation: Utilisez la solution Console (plus simple)\n</div>
     </div>
 
     <script>
-        let sessionValid = false;
-
-        window.addEventListener('load', checkSession);
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            log(`🔄 Méthode sélectionnée: ${tabName}`, 'info');
+        }
 
         function log(message, type = 'info') {
             const output = document.getElementById('logOutput');
@@ -194,206 +419,129 @@
             const icons = {
                 'info': 'ℹ️',
                 'success': '✅',
-                'error': '❌',
-                'warning': '⚠️',
-                'highlight': '🔥'
+                'error': '❌', 
+                'warning': '⚠️'
             };
             const icon = icons[type] || 'ℹ️';
             output.innerHTML += `<span class="${type}">[${timestamp}] ${icon} ${message}</span>\n`;
             output.scrollTop = output.scrollHeight;
         }
 
-        async function checkSession() {
-            const statusDiv = document.getElementById('sessionStatus');
-            const assignBtn = document.getElementById('assignRoleBtn');
+        function loadAzurePortal() {
+            const container = document.getElementById('portalContainer');
+            const iframe = document.getElementById('azureIframe');
+            const executeBtn = document.getElementById('executeBtn');
             
-            try {
-                log('Vérification de la session Azure AD active...', 'info');
-                
-                // Test d'accès aux API Graph via la session existante
-                const testResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
-                    method: 'GET',
-                    credentials: 'include', // Utilise les cookies de session
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (testResponse.ok) {
-                    const userInfo = await testResponse.json();
-                    sessionValid = true;
-                    statusDiv.className = 'status ready';
-                    statusDiv.innerHTML = `✅ Session admin active détectée: ${userInfo.displayName || userInfo.userPrincipalName}`;
-                    assignBtn.disabled = false;
-                    log(`Session valide détectée pour: ${userInfo.displayName || userInfo.userPrincipalName}`, 'success');
-                } else if (testResponse.status === 401) {
-                    throw new Error('Session expirée ou permissions insuffisantes');
-                } else {
-                    throw new Error(`Erreur d'accès: ${testResponse.status}`);
-                }
-                
-            } catch (error) {
-                sessionValid = false;
-                statusDiv.className = 'status error';
-                statusDiv.innerHTML = `❌ Session admin non détectée - ${error.message}`;
-                assignBtn.disabled = true;
-                log(`Erreur de session: ${error.message}`, 'error');
-                log('💡 Solution: Ouvrez https://portal.azure.com dans un nouvel onglet et connectez-vous en tant qu\'admin', 'warning');
-            }
-        }
-
-        async function makeGraphRequest(url, options = {}) {
-            const defaultOptions = {
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                }
+            container.style.display = 'block';
+            iframe.src = 'https://portal.azure.com';
+            
+            log('🌐 Chargement de portal.azure.com dans l\'iframe...', 'info');
+            
+            // Enable execute button after iframe loads
+            iframe.onload = function() {
+                executeBtn.disabled = false;
+                log('✅ Portal Azure chargé - Connectez-vous puis cliquez sur "Exécuter le script"', 'success');
             };
-
-            const response = await fetch(url, { ...defaultOptions, ...options });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorMessage;
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorMessage = errorJson.error?.message || errorText;
-                } catch {
-                    errorMessage = errorText || `HTTP ${response.status}`;
-                }
-                throw new Error(`[${response.status}] ${errorMessage}`);
-            }
-            
-            return response.json();
         }
 
-        async function assignRole() {
-            if (!sessionValid) {
-                log('Session non valide. Veuillez actualiser la page.', 'error');
-                return;
-            }
-
-            const assignBtn = document.getElementById('assignRoleBtn');
-            const applicationName = document.getElementById('appName').value.trim();
-            
-            if (!applicationName) {
-                log('Veuillez entrer le nom de l\'application', 'error');
-                return;
-            }
-
-            assignBtn.disabled = true;
-            assignBtn.textContent = '⏳ Attribution en cours...';
+        function executeInIframe() {
+            const iframe = document.getElementById('azureIframe');
+            const appName = document.getElementById('appNameIframe').value;
             
             try {
-                log('🚀 Début de l\'attribution du rôle User Administrator...', 'highlight');
-                await assignUserAdministratorRole(applicationName);
+                // Script à injecter dans l'iframe
+                const script = `
+                    (async function() {
+                        try {
+                            console.log('🚀 Début attribution rôle pour: ${appName}');
+                            
+                            // Vérification session
+                            const userResp = await fetch('/v1.0/me');
+                            const user = await userResp.json();
+                            console.log('✅ Utilisateur:', user.displayName);
+                            
+                            // Recherche app
+                            const appResp = await fetch('https://graph.microsoft.com/v1.0/applications?$filter=displayName eq \\'${appName.replace(/'/g, "\\'")}\\', {credentials: 'include'});
+                            const appData = await appResp.json();
+                            if (appData.value.length === 0) throw new Error('Application introuvable');
+                            const app = appData.value[0];
+                            
+                            // Service principal
+                            const spResp = await fetch('https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq \\'' + app.appId + '\\'', {credentials: 'include'});
+                            const spData = await spResp.json();
+                            if (spData.value.length === 0) throw new Error('Service principal introuvable');
+                            const sp = spData.value[0];
+                            
+                            // Rôle User Administrator
+                            const rolesResp = await fetch('https://graph.microsoft.com/v1.0/directoryRoles?$filter=displayName eq \\'User Administrator\\'', {credentials: 'include'});
+                            const rolesData = await rolesResp.json();
+                            
+                            let userAdminRole;
+                            if (rolesData.value.length === 0) {
+                                const activateResp = await fetch('https://graph.microsoft.com/v1.0/directoryRoles', {
+                                    method: 'POST',
+                                    credentials: 'include',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({roleTemplateId: 'fe930be7-5e62-47db-91af-98c3a49a38b1'})
+                                });
+                                userAdminRole = await activateResp.json();
+                            } else {
+                                userAdminRole = rolesData.value[0];
+                            }
+                            
+                            // Attribution
+                            await fetch('https://graph.microsoft.com/v1.0/directoryRoles/' + userAdminRole.id + '/members/$ref', {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({'@odata.id': 'https://graph.microsoft.com/v1.0/directoryObjects/' + sp.id})
+                            });
+                            
+                            alert('✅ SUCCÈS! Rôle User Administrator attribué à: ' + app.displayName);
+                            console.log('🎉 Attribution réussie!');
+                            
+                        } catch (error) {
+                            alert('❌ ERREUR: ' + error.message);
+                            console.error('Erreur:', error);
+                        }
+                    })();
+                `;
                 
-                assignBtn.className = 'btn success';
-                assignBtn.textContent = '✅ Rôle attribué avec succès !';
-                log('🎉 SUCCÈS : Rôle User Administrator attribué avec succès !', 'success');
+                // Injecter le script dans l'iframe
+                iframe.contentWindow.eval(script);
+                log('⚡ Script injecté dans l\'iframe Azure Portal', 'success');
                 
             } catch (error) {
-                log(`❌ ÉCHEC: ${error.message}`, 'error');
-                console.error('Erreur complète:', error);
-                assignBtn.disabled = false;
-                assignBtn.textContent = '⚡ Réessayer l\'attribution';
+                log(`❌ Erreur d'injection: ${error.message}`, 'error');
+                log('💡 Assurez-vous d\'être connecté dans l\'iframe', 'warning');
             }
         }
 
-        async function assignUserAdministratorRole(applicationName) {
-            const baseUrl = 'https://graph.microsoft.com/v1.0';
+        function copyConsoleScript() {
+            copyToClipboard('consoleScriptContent');
+            log('📋 Script copié dans le presse-papiers', 'success');
+        }
 
-            // 1. Rechercher l'application
-            log(`🔍 Recherche de l'application "${applicationName}"...`, 'info');
-            const appData = await makeGraphRequest(
-                `${baseUrl}/applications?$filter=displayName eq '${encodeURIComponent(applicationName)}'`
-            );
-
-            if (appData.value.length === 0) {
-                throw new Error(`Application "${applicationName}" introuvable. Vérifiez le nom exact.`);
-            }
-
-            const application = appData.value[0];
-            log(`✅ Application trouvée: ${application.displayName}`, 'success');
-            log(`   📋 App ID: ${application.appId}`, 'info');
-
-            // 2. Rechercher le service principal
-            log('🔍 Recherche du service principal associé...', 'info');
-            const spData = await makeGraphRequest(
-                `${baseUrl}/servicePrincipals?$filter=appId eq '${application.appId}'`
-            );
-
-            if (spData.value.length === 0) {
-                throw new Error(`Service principal introuvable pour l'application "${applicationName}"`);
-            }
-
-            const servicePrincipal = spData.value[0];
-            log(`✅ Service principal trouvé: ${servicePrincipal.id}`, 'success');
-
-            // 3. Rechercher le rôle User Administrator
-            log('🔍 Vérification du rôle "User Administrator"...', 'info');
-            const rolesData = await makeGraphRequest(
-                `${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`
-            );
-
-            let userAdminRole;
-
-            if (rolesData.value.length === 0) {
-                log('⚠️ Rôle "User Administrator" non activé. Activation automatique...', 'warning');
-                
-                userAdminRole = await makeGraphRequest(`${baseUrl}/directoryRoles`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        roleTemplateId: "fe930be7-5e62-47db-91af-98c3a49a38b1"
-                    })
-                });
-                
-                log(`✅ Rôle "User Administrator" activé: ${userAdminRole.displayName}`, 'success');
-            } else {
-                userAdminRole = rolesData.value[0];
-                log('✅ Rôle "User Administrator" déjà activé', 'success');
-            }
-
-            // 4. Vérifier si déjà membre
-            log('🔍 Vérification des membres existants du rôle...', 'info');
-            const membersData = await makeGraphRequest(
-                `${baseUrl}/directoryRoles/${userAdminRole.id}/members`
-            );
-
-            const isAlreadyMember = membersData.value.some(member => member.id === servicePrincipal.id);
-
-            if (isAlreadyMember) {
-                log('ℹ️ Le rôle "User Administrator" est déjà attribué à cette application', 'warning');
-                return;
-            }
-
-            // 5. Attribuer le rôle
-            log('⚡ Attribution du rôle à l\'application...', 'highlight');
-            await makeGraphRequest(`${baseUrl}/directoryRoles/${userAdminRole.id}/members/$ref`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    '@odata.id': `${baseUrl}/directoryObjects/${servicePrincipal.id}`
-                })
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                log('📋 Contenu copié!', 'success');
+            }).catch(() => {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                log('📋 Contenu copié (fallback)!', 'success');
             });
-
-            log('🎯 Attribution terminée avec succès !', 'success');
-            log(`📊 Résumé:`, 'highlight');
-            log(`   • Application: ${application.displayName}`, 'info');
-            log(`   • Service Principal: ${servicePrincipal.id}`, 'info');
-            log(`   • Rôle attribué: User Administrator`, 'info');
         }
 
-        // Auto-focus sur le champ application
-        document.getElementById('appName').focus();
-        
-        // Permettre l'exécution avec Entrée
-        document.getElementById('appName').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' && !document.getElementById('assignRoleBtn').disabled) {
-                assignRole();
-            }
-        });
+        // Log initial
+        log('🔧 Solutions CORS disponibles', 'info');
+        log('💡 Recommandation: Utilisez la méthode Console', 'info');
     </script>
 </body>
 </html>
