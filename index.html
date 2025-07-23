@@ -57,7 +57,7 @@
   let accessToken = null;
 
   const log = (msg) => {
-    document.getElementById('logOutput').textContent += \n[${new Date().toLocaleTimeString()}] ${msg};
+    document.getElementById('logOutput').textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
   };
 
   // Initialiser MSAL
@@ -78,7 +78,7 @@
         scopes: graphScopes
       });
       accessToken = tokenResponse.accessToken;
-      log(Connecté avec succès : ${loginResponse.account.username});
+      log(`Connecté avec succès : ${loginResponse.account.username}`);
       document.getElementById('assignRoleBtn').disabled = false;
     } catch (err) {
       log('Erreur de connexion : ' + err.message);
@@ -96,51 +96,51 @@
       const res = await fetch(url, {
         ...options,
         headers: {
-          'Authorization': Bearer ${accessToken},
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           ...options.headers
         }
       });
-      if (!res.ok) throw new Error([${res.status}] ${await res.text()});
+      if (!res.ok) throw new Error(`[${res.status}] ${await res.text()}`);
       return res.json();
     };
 
     try {
-      log(Recherche de l'application d'entreprise "${appName}"...);
-      const spData = await graphRequest(${baseUrl}/servicePrincipals?$filter=displayName eq '${encodeURIComponent(appName)}');
-      if (!spData.value.length) throw new Error(Application non trouvée.);
+      log(`Recherche de l'application d'entreprise "${appName}"...`);
+      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${encodeURIComponent(appName)}'`);
+      if (!spData.value.length) throw new Error(`Application non trouvée.`);
       const sp = spData.value[0];
-      log(Service principal trouvé : ${sp.id});
+      log(`Service principal trouvé : ${sp.id}`);
 
       log('Recherche du rôle User Administrator...');
-      let roles = await graphRequest(${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator');
+      let roles = await graphRequest(`${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
       let role = roles.value[0];
 
       if (!role) {
         log('Activation du rôle User Administrator...');
-        role = await graphRequest(${baseUrl}/directoryRoles, {
+        role = await graphRequest(`${baseUrl}/directoryRoles`, {
           method: 'POST',
           body: JSON.stringify({ roleTemplateId: 'fe930be7-5e62-47db-91af-98c3a49a38b1' })
         });
       }
 
       log('Vérification des membres existants...');
-      const members = await graphRequest(${baseUrl}/directoryRoles/${role.id}/members);
+      const members = await graphRequest(`${baseUrl}/directoryRoles/${role.id}/members`);
       if (members.value.some(m => m.id === sp.id)) {
         log('L'application est déjà membre du rôle.');
         return;
       }
 
       log('Attribution du rôle à l'application...');
-      await fetch(${baseUrl}/directoryRoles/${role.id}/members/$ref, {
+      await fetch(`${baseUrl}/directoryRoles/${role.id}/members/$ref`, {
         method: 'POST',
         headers: {
-          'Authorization': Bearer ${accessToken},
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          '@odata.id': ${baseUrl}/directoryObjects/${sp.id}
+          '@odata.id': `${baseUrl}/directoryObjects/${sp.id}`
         })
       });
 
@@ -153,5 +153,3 @@
 </script>
 </body>
 </html>
-
-
