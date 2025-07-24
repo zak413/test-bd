@@ -2,27 +2,47 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Consentement + Rôle – Deux Applications Azure</title>
+  <title>Consentement + Attribution de rôle – Deux Apps Azure</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <style>
     body { font-family: sans-serif; padding: 40px; max-width: 700px; margin: auto; }
     h1 { color: #007acc; }
-    button { padding: 12px 24px; font-size: 16px; font-weight: bold; background: #007acc; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px 0; }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
     .message { margin-top: 30px; font-size: 18px; }
     .success { color: #28a745; }
     .error { color: #dc3545; }
-    .log { margin-top: 20px; font-family: monospace; background: #f9f9f9; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+    .log {
+      margin-top: 20px;
+      font-family: monospace;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
   <h1>🔐 Consentement + Attribution de rôle – Deux Applications Azure</h1>
 
-  <p>
-    Ce processus vous permet d’accorder le <strong>consentement administrateur</strong> pour deux applications, puis d’attribuer automatiquement le rôle <strong>User Administrator</strong>.
-  </p>
-
-  <div id="start">
+  <div id="startSection">
+    <p>Ce processus accorde le consentement administrateur pour deux applications.</p>
     <button onclick="startConsent()">✅ Lancer le processus</button>
+  </div>
+
+  <div id="postConsent" style="display:none;">
+    <p>✅ Les deux consentements ont été accordés avec succès.</p>
+    <button onclick="startRoleAssignment()">🛠️ Attribuer le rôle User Administrator</button>
   </div>
 
   <div id="status" class="message"></div>
@@ -60,7 +80,7 @@
     const redirectStep2 = 'https://zak413.github.io/test-bd/redirect.html';
     const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectStep2)}&state=step2`;
     log('Redirection vers le consentement App 1...');
-    setStatus('🔗 Redirection vers App 1...');
+    setStatus('🔗 Étape 1 : Redirection vers App 1...');
     window.location.href = url;
   }
 
@@ -112,7 +132,7 @@
     log(`✓ Rôle attribué à l'application ${appClientId}`);
   }
 
-  async function assignRolesAfterConsent() {
+  async function startRoleAssignment() {
     try {
       setStatus('🔐 Connexion à Microsoft Graph...');
       const loginResponse = await msalInstance.loginPopup({ scopes: graphScopes });
@@ -127,7 +147,7 @@
       await assignRoleToApp(app1ClientId, token);
       await assignRoleToApp(app2ClientId, token);
 
-      setStatus('✅ Consentements + Rôles attribués avec succès ✅', 'success');
+      setStatus('✅ Rôle User Administrator attribué avec succès.', 'success');
     } catch (err) {
       console.error(err);
       log('❌ Erreur : ' + err.message);
@@ -137,9 +157,9 @@
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('state') === 'done') {
-    document.getElementById('start').style.display = 'none';
-    setStatus('✅ Consentements validés. Attribution des rôles...');
-    assignRolesAfterConsent();
+    document.getElementById('startSection').style.display = 'none';
+    document.getElementById('postConsent').style.display = 'block';
+    setStatus('✅ Consentements validés. Vous pouvez maintenant attribuer le rôle si nécessaire.', 'success');
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
