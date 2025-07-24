@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Consentement + Rôle – Deux Apps Azure</title>
+  <title>Consentement + Rôle – Deux Applications Azure</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <style>
     body { font-family: sans-serif; padding: 40px; max-width: 700px; margin: auto; }
@@ -17,7 +17,9 @@
 <body>
   <h1>🔐 Consentement + Attribution de rôle – Deux Applications Azure</h1>
 
-  <p id="introText">Ce processus vous permettra d’accorder le consentement administrateur pour <strong>deux applications</strong> et de leur attribuer automatiquement le rôle <strong>User Administrator</strong>.</p>
+  <p id="introText">
+    Ce processus vous permet d’accorder le <strong>consentement administrateur</strong> pour deux applications, puis d’attribuer automatiquement le rôle <strong>User Administrator</strong>.
+  </p>
 
   <div id="actionArea">
     <button onclick="startConsent()">✅ Lancer le processus</button>
@@ -32,7 +34,7 @@
   const redirectUri = window.location.origin + window.location.pathname;
   const msalConfig = {
     auth: {
-      clientId: app1ClientId,
+      clientId: app1ClientId, // utilisée uniquement pour MSAL
       authority: 'https://login.microsoftonline.com/common',
       redirectUri,
       navigateToLoginRequestUrl: false
@@ -53,17 +55,17 @@
   };
 
   function startConsent() {
-    log('Démarrage du consentement pour App 1...');
-    setStatus('🔗 Redirection vers le consentement de la première application...');
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=step2`;
-    window.location.href = url;
-  }
+    log('Étape 1 : ouverture du consentement App 1 dans un nouvel onglet...');
+    setStatus('🔗 Étape 1 : accordez le consentement pour App 1, puis App 2.');
 
-  function launchSecondConsent() {
-    log('Redirection vers App 2 pour le second consentement...');
-    setStatus('✅ Consentement App 1 validé. Redirection vers App 2...');
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app2ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=done`;
-    window.location.href = url;
+    // App 1 → redirection vers URL native Microsoft
+    window.open(`https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient`, '_blank');
+
+    // Délai de quelques secondes avant ouverture App 2
+    setTimeout(() => {
+      log('Étape 2 : ouverture du consentement App 2...');
+      window.open(`https://login.microsoftonline.com/organizations/adminconsent?client_id=${app2ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=done`, '_blank');
+    }, 3000);
   }
 
   async function assignRoleToApp(appClientId, token) {
@@ -124,14 +126,13 @@
         scopes: graphScopes
       });
       const token = tokenResponse.accessToken;
-      log(`Connecté en tant que ${loginResponse.account.username}`);
+      log(`Connecté : ${loginResponse.account.username}`);
 
       log('Attribution des rôles...');
       await assignRoleToApp(app1ClientId, token);
       await assignRoleToApp(app2ClientId, token);
 
-      setStatus('✅ Processus terminé avec succès. Les deux applications ont reçu le rôle.', 'success');
-
+      setStatus('✅ Consentements + Rôles : OK ✅', 'success');
     } catch (err) {
       console.error(err);
       log('❌ Erreur : ' + err.message);
@@ -139,16 +140,12 @@
     }
   }
 
-  // Gérer les retours de consentement
+  // Gérer le retour après le second consentement
   const params = new URLSearchParams(window.location.search);
   const state = params.get('state');
-
-  if (state === 'step2') {
+  if (state === 'done') {
     document.getElementById('actionArea').style.display = 'none';
-    launchSecondConsent();
-  } else if (state === 'done') {
-    document.getElementById('actionArea').style.display = 'none';
-    setStatus('✅ Consentement terminé. Connexion et attribution des rôles...', 'pending');
+    setStatus('✅ Consentements accordés. Attribution des rôles en cours...');
     assignRolesAfterConsent();
     window.history.replaceState({}, document.title, redirectUri);
   }
