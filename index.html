@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Consentement & Rôle - Deux Applications Azure</title>
+  <title>Consentement + Rôle – Deux Apps Azure</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <style>
     body { font-family: sans-serif; padding: 40px; max-width: 700px; margin: auto; }
@@ -15,11 +15,12 @@
   </style>
 </head>
 <body>
-  <h1>🔐 Consentement + Attribution de rôle – 2 Applications</h1>
-  <p>Cliquez sur le bouton ci-dessous pour accorder le consentement administrateur aux deux applications <strong>et leur attribuer automatiquement le rôle User Administrator</strong>.</p>
+  <h1>🔐 Consentement + Attribution de rôle – Deux Applications Azure</h1>
 
-  <div id="step1">
-    <button onclick="startConsent()">✅ Lancer le processus complet</button>
+  <p id="introText">Ce processus vous permettra d’accorder le consentement administrateur pour <strong>deux applications</strong> et de leur attribuer automatiquement le rôle <strong>User Administrator</strong>.</p>
+
+  <div id="actionArea">
+    <button onclick="startConsent()">✅ Lancer le processus</button>
   </div>
 
   <div id="status" class="message"></div>
@@ -31,7 +32,7 @@
   const redirectUri = window.location.origin + window.location.pathname;
   const msalConfig = {
     auth: {
-      clientId: app1ClientId, // MSAL needs a registered client app (can be one of the two)
+      clientId: app1ClientId,
       authority: 'https://login.microsoftonline.com/common',
       redirectUri,
       navigateToLoginRequestUrl: false
@@ -52,16 +53,20 @@
   };
 
   function startConsent() {
+    log('Démarrage du consentement pour App 1...');
+    setStatus('🔗 Redirection vers le consentement de la première application...');
     const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=step2`;
     window.location.href = url;
   }
 
   function launchSecondConsent() {
+    log('Redirection vers App 2 pour le second consentement...');
+    setStatus('✅ Consentement App 1 validé. Redirection vers App 2...');
     const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app2ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=done`;
     window.location.href = url;
   }
 
-  async function assignRoleToApp(spId, token) {
+  async function assignRoleToApp(appClientId, token) {
     const graphUrl = 'https://graph.microsoft.com/v1.0';
 
     const fetchJson = async (url, options = {}) => {
@@ -77,26 +82,27 @@
       return res.json();
     };
 
-    // Get User Administrator role
+    const spResult = await fetchJson(`${graphUrl}/servicePrincipals?$filter=appId eq '${appClientId}'`);
+    if (!spResult.value.length) throw new Error('Service principal non trouvé pour l’app ' + appClientId);
+    const spId = spResult.value[0].id;
+
     let roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
     let role = roles.value[0];
 
     if (!role) {
-      log('Activation du rôle "User Administrator"...');
+      log(`Activation du rôle "User Administrator"...`);
       role = await fetchJson(`${graphUrl}/directoryRoles`, {
         method: 'POST',
         body: JSON.stringify({ roleTemplateId: 'fe930be7-5e62-47db-91af-98c3a49a38b1' })
       });
     }
 
-    // Check if already a member
     const members = await fetchJson(`${graphUrl}/directoryRoles/${role.id}/members`);
     if (members.value.some(m => m.id === spId)) {
-      log(`✓ L'application ${spId} est déjà membre du rôle.`);
+      log(`✓ L'app ${appClientId} est déjà membre du rôle.`);
       return;
     }
 
-    // Assign role
     await fetch(`${graphUrl}/directoryRoles/${role.id}/members/$ref`, {
       method: 'POST',
       headers: {
@@ -106,57 +112,44 @@
       body: JSON.stringify({ "@odata.id": `${graphUrl}/directoryObjects/${spId}` })
     });
 
-    log(`✓ Rôle attribué à l’application ${spId}.`);
+    log(`✓ Rôle attribué à l'application ${appClientId}`);
   }
 
   async function assignRolesAfterConsent() {
     try {
-      setStatus('🔐 Connexion à Microsoft Graph...', 'pending');
+      setStatus('🔐 Connexion à Microsoft Graph...');
       const loginResponse = await msalInstance.loginPopup({ scopes: graphScopes });
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
         scopes: graphScopes
       });
       const token = tokenResponse.accessToken;
-      log(`Connecté : ${loginResponse.account.username}`);
+      log(`Connecté en tant que ${loginResponse.account.username}`);
 
-      // Chercher les servicePrincipals par clientId
-      const fetchSP = async (clientId) => {
-        const res = await fetch(`https://graph.microsoft.com/v1.0/servicePrincipals?$filter=appId eq '${clientId}'`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const json = await res.json();
-        if (!json.value.length) throw new Error(`Aucun service principal trouvé pour ${clientId}`);
-        return json.value[0].id;
-      };
+      log('Attribution des rôles...');
+      await assignRoleToApp(app1ClientId, token);
+      await assignRoleToApp(app2ClientId, token);
 
-      const sp1 = await fetchSP(app1ClientId);
-      const sp2 = await fetchSP(app2ClientId);
-
-      log('Attribution du rôle "User Administrator" à App 1...');
-      await assignRoleToApp(sp1, token);
-
-      log('Attribution du rôle "User Administrator" à App 2...');
-      await assignRoleToApp(sp2, token);
-
-      setStatus('✅ Consentement et rôles attribués avec succès !', 'success');
+      setStatus('✅ Processus terminé avec succès. Les deux applications ont reçu le rôle.', 'success');
 
     } catch (err) {
+      console.error(err);
       log('❌ Erreur : ' + err.message);
-      setStatus('Erreur lors de l\'attribution des rôles.', 'error');
+      setStatus('❌ Erreur lors de l’attribution des rôles', 'error');
     }
   }
 
+  // Gérer les retours de consentement
   const params = new URLSearchParams(window.location.search);
   const state = params.get('state');
 
   if (state === 'step2') {
-    setStatus('Consentement App 1 validé. Redirection vers App 2...');
-    setTimeout(launchSecondConsent, 1500);
+    document.getElementById('actionArea').style.display = 'none';
+    launchSecondConsent();
   } else if (state === 'done') {
-    setStatus('Consentements accordés. Connexion à Microsoft Graph...', 'pending');
+    document.getElementById('actionArea').style.display = 'none';
+    setStatus('✅ Consentement terminé. Connexion et attribution des rôles...', 'pending');
     assignRolesAfterConsent();
-    // Nettoyer l'URL
     window.history.replaceState({}, document.title, redirectUri);
   }
 </script>
