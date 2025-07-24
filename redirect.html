@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirection intermédiaire</title>
+  <script>
+    const app2ClientId = 'c747839c-80d9-4499-9f8a-f149ac89a9ba';
+    const finalRedirect = 'https://zak413.github.io/test-bd/';
+    const nextConsent = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app2ClientId}&redirect_uri=${encodeURIComponent(finalRedirect)}&state=done`;
+
+    // Redirection automatique après 1 seconde
+    setTimeout(() => {
+      window.location.href = nextConsent;
+    }, 1000);
+  </script>
+</head>
+<body>
+  <p>⏳ Merci. Redirection automatique vers la seconde application en cours...</p>
+</body>
+</html>
