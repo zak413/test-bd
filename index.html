@@ -43,10 +43,10 @@
 
   <!-- Application 2 -->
   <div class="app-section">
-    <h2>🔧 Application 2 : Deuxième Application</h2>
+    <h2>🔧 Application 2 : MsMigtoolapps</h2>
     <div class="app-info">
       <strong>Client ID :</strong> c747839c-80d9-4499-9f8a-f149ac89a9ba<br>
-      <strong>Nom de l'application :</strong> <input type="text" id="app2Name" value="" placeholder="Nom exact de l'application dans Azure AD" style="width:400px; padding:5px;">
+      <strong>Nom de l'application :</strong> <input type="text" id="app2Name" value="MsMigtoolapps" style="width:400px; padding:5px;">
     </div>
     <button id="consentApp2Btn" class="btn btn-consent" disabled>Donner consentement admin</button>
     <button id="assignRoleApp2Btn" class="btn btn-role" disabled>Attribuer rôle User Administrator</button>
@@ -128,26 +128,55 @@
     }
   };
 
+  // Fonction pour gérer les popups de consentement
+  const openConsentPopup = (clientId, appName, statusElementId) => {
+    log(`Ouverture du consentement pour ${appName}...`);
+    updateStatus(statusElementId, 'Consentement en cours...', 'pending');
+    
+    const consentUrl = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${clientId}&state=${appName}&redirect_uri=${encodeURIComponent(window.location.origin)}`;
+    
+    const popup = window.open(consentUrl, 'consent_popup', 'width=600,height=700,scrollbars=yes,resizable=yes');
+    
+    // Surveiller le popup pour détecter la fermeture ou le succès
+    const checkPopup = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          log(`Popup fermée pour ${appName}`);
+          updateStatus(statusElementId, '✓ Consentement terminé', 'success');
+          return;
+        }
+        
+        // Vérifier si on est arrivé sur une page de succès ou de redirection
+        if (popup.location && (popup.location.href.includes(window.location.origin) || popup.location.href.includes('admin_consent=True'))) {
+          popup.close();
+          clearInterval(checkPopup);
+          log(`Consentement réussi pour ${appName}`);
+          updateStatus(statusElementId, '✓ Consentement accordé avec succès', 'success');
+        }
+      } catch (e) {
+        // Erreur d'accès cross-origin normale, on continue à surveiller
+      }
+    }, 1000);
+    
+    // Timeout après 5 minutes
+    setTimeout(() => {
+      if (!popup.closed) {
+        clearInterval(checkPopup);
+        log(`Timeout pour le consentement de ${appName}`);
+        updateStatus(statusElementId, '⚠ Timeout - Vérifiez le consentement manuellement', 'pending');
+      }
+    }, 300000);
+  };
+
   // Consentement Application 1 (utilise l'app actuelle pour le consentement)
   document.getElementById('consentApp1Btn').onclick = async () => {
-    log('Ouverture du consentement pour l\'application 1...');
-    updateStatus('app1Status', 'Consentement en cours...', 'pending');
-    
-    const consentUrl = `https://login.microsoftonline.com/organizations/adminconsent?client_id=58deb25d-3881-4c76-863b-70e3fcb1739b&state=app1`;
-    window.open(consentUrl, '_blank', 'width=600,height=600');
-    
-    updateStatus('app1Status', '✓ Consentement demandé (vérifiez la popup)', 'success');
+    openConsentPopup('58deb25d-3881-4c76-863b-70e3fcb1739b', 'Sensor mail et audit XDR Bitdefender', 'app1Status');
   };
 
   // Consentement Application 2
   document.getElementById('consentApp2Btn').onclick = async () => {
-    log('Ouverture du consentement pour l\'application 2...');
-    updateStatus('app2Status', 'Consentement en cours...', 'pending');
-    
-    const consentUrl = `https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba&state=app2`;
-    window.open(consentUrl, '_blank', 'width=600,height=600');
-    
-    updateStatus('app2Status', '✓ Consentement demandé (vérifiez la popup)', 'success');
+    openConsentPopup('c747839c-80d9-4499-9f8a-f149ac89a9ba', 'MsMigtoolapps', 'app2Status');
   };
 
   // Attribution du rôle (fonction générique)
@@ -179,10 +208,30 @@
       updateStatus(statusElementId, 'Attribution en cours...', 'pending');
       
       const safeAppName = appName.replace(/'/g, "''");
-      const spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${safeAppName}'`);
-      if (!spData.value.length) throw new Error(`Application "${appName}" non trouvée.`);
+      let spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=displayName eq '${safeAppName}'`);
+      
+      if (!spData.value.length) {
+        log(`[App ${appNumber}] Application non trouvée, recherche par appId pour les apps Microsoft...`);
+        
+        // Pour MsMigtoolapps et autres apps Microsoft, essayer de chercher par appId
+        if (appNumber === 2) {
+          try {
+            spData = await graphRequest(`${baseUrl}/servicePrincipals?$filter=appId eq 'c747839c-80d9-4499-9f8a-f149ac89a9ba'`);
+            if (spData.value.length) {
+              log(`[App ${appNumber}] Application trouvée par appId`);
+            }
+          } catch (e) {
+            log(`[App ${appNumber}] Recherche par appId échouée: ${e.message}`);
+          }
+        }
+        
+        if (!spData.value.length) {
+          throw new Error(`Application "${appName}" non trouvée. Assurez-vous que le consentement admin a été donné d'abord.`);
+        }
+      }
+      
       const sp = spData.value[0];
-      log(`[App ${appNumber}] Service principal trouvé : ${sp.id}`);
+      log(`[App ${appNumber}] Service principal trouvé : ${sp.id} (${sp.displayName})`);
 
       log(`[App ${appNumber}] Recherche du rôle User Administrator...`);
       let roles = await graphRequest(`${baseUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
@@ -222,6 +271,11 @@
     } catch (err) {
       log(`[App ${appNumber}] Erreur : ` + err.message);
       updateStatus(statusElementId, '✗ Erreur lors de l\'attribution', 'error');
+      
+      // Suggestion spécifique pour l'app 2
+      if (appNumber === 2 && err.message.includes('non trouvée')) {
+        updateStatus(statusElementId, '✗ App non trouvée - Donnez d\'abord le consentement', 'error');
+      }
     }
   };
 
