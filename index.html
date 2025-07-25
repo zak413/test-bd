@@ -97,8 +97,8 @@
     </div>
 
     <div id="postConsent" style="display:none;">
-      <p>✅ Les deux consentements ont été accordés avec succès.</p>
-      <button onclick="startRoleAssignment()">🛠️ Attribuer le rôle User Administrator</button>
+      <p>✅ Les deux applications ont été créées.</p>
+      <button onclick="startRoleAssignment()">Attribuer le rôle User Administrator</button>
     </div>
 
     <div id="status" class="message"></div>
@@ -201,7 +201,7 @@
       };
 
       const loginResponse = await msalInstance.loginPopup(loginRequest);
-      log('Popup de connexion fermé avec succès');
+      
 
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
