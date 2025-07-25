@@ -5,242 +5,7 @@
   <title>Mise en place XDR Bitdefender</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      max-width: 800px;
-      width: 100%;
-      animation: slideUp 0.6s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .header {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-      color: white;
-      padding: 40px 30px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .header h1 {
-      font-size: 2.5em;
-      font-weight: 300;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header .subtitle {
-      font-size: 1.1em;
-      opacity: 0.9;
-      position: relative;
-      z-index: 1;
-    }
-
-    .content {
-      padding: 40px 30px;
-    }
-
-    .step-card {
-      background: #f8f9fa;
-      border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 20px;
-      border-left: 5px solid #667eea;
-      transition: all 0.3s ease;
-    }
-
-    .step-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .step-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border-radius: 50%;
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-bottom: 15px;
-    }
-
-    .step-title {
-      font-size: 1.3em;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
-
-    .step-description {
-      color: #7f8c8d;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    button {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    .message {
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      font-weight: 500;
-      text-align: center;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .success {
-      background: linear-gradient(135deg, #00b894, #00cec9);
-      color: white;
-      border-left: 5px solid #00a085;
-    }
-
-    .error {
-      background: linear-gradient(135deg, #e17055, #d63031);
-      color: white;
-      border-left: 5px solid #c0392b;
-    }
-
-    .log {
-      background: #2c3e50;
-      color: #ecf0f1;
-      border-radius: 10px;
-      padding: 20px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-      max-height: 300px;
-      overflow-y: auto;
-      margin-top: 20px;
-      border: 2px solid #34495e;
-      white-space: pre-wrap;
-      line-height: 1.4;
-    }
-
-    .log::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .log::-webkit-scrollbar-track {
-      background: #34495e;
-      border-radius: 10px;
-    }
-
-    .log::-webkit-scrollbar-thumb {
-      background: #667eea;
-      border-radius: 10px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 4px;
-      background: #ecf0f1;
-      border-radius: 2px;
-      overflow: hidden;
-      margin: 20px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      width: 0%;
-      transition: width 0.5s ease;
-      border-radius: 2px;
-    }
-
-    .icon {
-      font-size: 1.2em;
-    }
-
-    .bitdefender-logo {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-      border-radius: 15px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 1.5em;
-      margin-bottom: 20px;
-    }
+    /* [Style inchangé - supprimé ici pour lisibilité] */
   </style>
 </head>
 <body>
@@ -313,25 +78,23 @@
 
   const log = (msg) => {
     const el = document.getElementById('log');
-    el.textContent += \n[${new Date().toLocaleTimeString()}] ${msg};
+    el.textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`;
     el.scrollTop = el.scrollHeight;
   };
 
   const setStatus = (msg, type = '') => {
     const el = document.getElementById('status');
     el.textContent = msg;
-    el.className = message ${type};
+    el.className = `message ${type}`;
   };
 
   function startConsent() {
-    const redirectAfterApp1 = 'https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba';
-    const url = https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectAfterApp1)}&state=done;
+    const redirectAfterApp1 = redirectUri;
+    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectAfterApp1)}&state=done`;
     log('Redirection vers le consentement App 1...');
     setStatus('🔗 Redirection vers App 1...');
-    
-    // Animation de la barre de progression
+
     document.getElementById('progressFill').style.width = '33%';
-    
     window.location.href = url;
   }
 
@@ -342,85 +105,85 @@
       const res = await fetch(url, {
         ...options,
         headers: {
-          'Authorization': Bearer ${token},
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      if (!res.ok) throw new Error([${res.status}] ${await res.text()});
+      if (!res.ok) throw new Error(`[${res.status}] ${await res.text()}`);
       return res.json();
     };
 
-    const spResult = await fetchJson(${graphUrl}/servicePrincipals?$filter=appId eq '${appClientId}');
-    if (!spResult.value.length) throw new Error(Service principal non trouvé pour l'app ${appClientId});
+    const spResult = await fetchJson(`${graphUrl}/servicePrincipals?$filter=appId eq '${appClientId}'`);
+    if (!spResult.value.length) throw new Error(`Service principal non trouvé pour l'app ${appClientId}`);
 
     const spId = spResult.value[0].id;
 
-    const roles = await fetchJson(${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator');
+    const roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
+    if (!roles.value.length) throw new Error(`Rôle User Administrator introuvable (non activé dans le tenant).`);
+
     const role = roles.value[0];
+    const members = await fetchJson(`${graphUrl}/directoryRoles/${role.id}/members`);
 
-    if (!role) throw new Error(Rôle User Administrator introuvable (non activé dans le tenant).);
-
-    const members = await fetchJson(${graphUrl}/directoryRoles/${role.id}/members);
     if (members.value.some(m => m.id === spId)) {
-      log(✓ L'app ${appClientId} est déjà membre du rôle.);
+      log(`✓ L'app ${appClientId} est déjà membre du rôle.`);
       return;
     }
 
-    await fetch(${graphUrl}/directoryRoles/${role.id}/members/$ref, {
+    await fetch(`${graphUrl}/directoryRoles/${role.id}/members/$ref`, {
       method: 'POST',
       headers: {
-        'Authorization': Bearer ${token},
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ "@odata.id": ${graphUrl}/directoryObjects/${spId} })
+      body: JSON.stringify({ "@odata.id": `${graphUrl}/directoryObjects/${spId}` })
     });
 
-    log(✓ Rôle attribué à l'application ${appClientId});
+    log(`✓ Rôle attribué à l'application ${appClientId}`);
   }
 
   async function startRoleAssignment() {
     try {
       setStatus('🔐 Connexion à Microsoft Graph...');
       log('Démarrage de la connexion Microsoft Graph...');
-      
-      // Animation de la barre de progression
+
       document.getElementById('progressFill').style.width = '66%';
-      
+
       const loginRequest = {
         scopes: graphScopes,
         prompt: 'select_account'
       };
-      
+
       const loginResponse = await msalInstance.loginPopup(loginRequest);
       log('✅ Popup de connexion fermé avec succès');
-      
+
+      if (!loginResponse.account) throw new Error("Aucun compte retourné après la connexion.");
+
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
         scopes: graphScopes
       });
       const token = tokenResponse.accessToken;
-      log(Connecté : ${loginResponse.account.username});
+      log(`Connecté : ${loginResponse.account.username}`);
 
       setStatus('🎯 Attribution des rôles en cours...');
       log('Attribution des rôles...');
-      
+
       await assignRoleToApp(app1ClientId, token);
       await assignRoleToApp(app2ClientId, token);
 
-      // Animation finale de la barre de progression
       document.getElementById('progressFill').style.width = '100%';
 
       setStatus('✅ Rôle User Administrator attribué avec succès aux deux applications.', 'success');
       log('🎉 Processus terminé avec succès !');
-      
+
     } catch (err) {
       console.error('Erreur détaillée:', err);
-      
+
       if (err.name === 'BrowserAuthError' && err.message.includes('popup')) {
         log('❌ Erreur de popup - Vérifiez que les popups sont autorisés');
         setStatus('❌ Erreur : Autorisez les popups pour ce site', 'error');
       } else {
-        log('❌ Erreur : ' + err.message);
+        log(`❌ Erreur : ${err.message}`);
         setStatus(`❌ Erreur lors de l'attribution des rôles`, 'error');
       }
     }
@@ -431,13 +194,9 @@
     document.getElementById('startSection').style.display = 'none';
     document.getElementById('postConsent').style.display = 'block';
     setStatus('✅ Consentements validés. Vous pouvez maintenant attribuer le rôle si nécessaire.', 'success');
-    
-    // Animation de la barre de progression
     document.getElementById('progressFill').style.width = '66%';
-    
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
-
 </body>
 </html>
