@@ -81,7 +81,7 @@
   };
 
   function startConsent() {
-    const redirectStep2 = 'https://zak413.github.io/test-bd/redirect.html';
+    const redirectStep2 = 'https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba';
     const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectStep2)}&state=step2`;
     log('Redirection vers le consentement App 1...');
     setStatus('🔗 Étape 1 : Redirection vers App 1...');
