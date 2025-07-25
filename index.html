@@ -51,7 +51,6 @@
 <script>
   const app1ClientId = '58deb25d-3881-4c76-863b-70e3fcb1739b';
   const app2ClientId = 'c747839c-80d9-4499-9f8a-f149ac89a9ba';
-  const redirectUri = window.location.origin + window.location.pathname;
 
   const msalConfig = {
     auth: {
@@ -81,10 +80,9 @@
   };
 
   function startConsent() {
-    const redirectStep2 = 'https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba';
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectStep2)}&state=step2`;
+    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(msalConfig.auth.redirectUri)}&state=done`;
     log('Redirection vers le consentement App 1...');
-    setStatus('🔗 Étape 1 : Redirection vers App 1...');
+    setStatus('🔗 Redirection vers App 1...');
     window.location.href = url;
   }
 
@@ -111,13 +109,7 @@
     let roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
     let role = roles.value[0];
 
-    if (!role) {
-      log('Activation du rôle User Administrator...');
-      role = await fetchJson(`${graphUrl}/directoryRoles`, {
-        method: 'POST',
-        body: JSON.stringify({ roleTemplateId: 'fe930be7-5e62-47db-91af-98c3a49a38b1' })
-      });
-    }
+    if (!role) throw new Error(`Rôle User Administrator introuvable (non activé dans le tenant).`);
 
     const members = await fetchJson(`${graphUrl}/directoryRoles/${role.id}/members`);
     if (members.value.some(m => m.id === spId)) {
@@ -142,7 +134,6 @@
       setStatus('🔐 Connexion à Microsoft Graph...');
       log('Démarrage de la connexion Microsoft Graph...');
       
-      // Configuration spéciale pour le popup
       const loginRequest = {
         scopes: graphScopes,
         prompt: 'select_account'
@@ -188,5 +179,3 @@
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
-</body>
-</html>
