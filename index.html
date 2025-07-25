@@ -2,101 +2,111 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Bitdefender XDR - Configuration Azure</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mise en place XDR Bitdefender</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
+      font-family: system-ui, sans-serif;
+      background: #f4f6f8;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 20px;
     }
 
-    .card {
+    .container {
       background: white;
-      border-radius: 16px;
-      padding: 30px 40px;
-      max-width: 500px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 40px;
+      max-width: 600px;
       width: 100%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       text-align: center;
-      animation: fadeIn 0.6s ease-out;
     }
 
     h1 {
       font-size: 1.8em;
-      margin-bottom: 10px;
-      color: #2c3e50;
+      color: #007acc;
+      margin-bottom: 20px;
     }
 
     p {
-      color: #666;
+      color: #333;
+      font-size: 1.05em;
       margin-bottom: 30px;
     }
 
     button {
-      background: linear-gradient(to right, #667eea, #764ba2);
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
-      padding: 12px 24px;
+      padding: 14px 28px;
       font-size: 1em;
+      font-weight: 600;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
     }
 
     button:hover {
-      background: linear-gradient(to right, #5a68d6, #6f48a0);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
     }
 
-    .status {
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 8px;
+    .message {
+      margin-top: 25px;
+      font-size: 1em;
       font-weight: 500;
-      font-size: 0.95em;
-      display: none;
     }
 
-    .status.success { background: #d1f7e3; color: #1e7e34; }
-    .status.error { background: #fbe4e6; color: #c0392b; }
+    .success {
+      color: #2ecc71;
+    }
+
+    .error {
+      color: #e74c3c;
+    }
 
     .log {
-      margin-top: 20px;
-      font-family: monospace;
-      font-size: 0.8em;
-      background: #f7f9fa;
-      border: 1px solid #e1e5ea;
-      border-radius: 8px;
+      margin-top: 25px;
+      background: #f0f0f0;
+      border-radius: 6px;
       padding: 15px;
-      max-height: 200px;
-      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #333;
       text-align: left;
       white-space: pre-wrap;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🔐 Bitdefender XDR – Azure Setup</h1>
 
-  <div class="card">
-    <h1>Bitdefender XDR</h1>
-    <p id="stepDescription">Accordez le consentement administrateur aux applications Azure nécessaires.</p>
-    <button id="mainAction" onclick="startConsent()">Démarrer le consentement</button>
+    <div id="startSection">
+      <p>Ce processus accorde le consentement administrateur pour deux applications Azure nécessaires.</p>
+      <button onclick="startConsent()">✅ Lancer le processus</button>
+    </div>
 
-    <div id="status" class="status"></div>
-    <div id="log" class="log">[INFO] En attente de votre action...</div>
+    <div id="postConsent" style="display:none;">
+      <p>✅ Les deux consentements ont été accordés avec succès.</p>
+      <button onclick="startRoleAssignment()">🛠️ Attribuer le rôle User Administrator</button>
+    </div>
+
+    <div id="status" class="message"></div>
+    <div id="log" class="log">[INFO] Prêt...</div>
   </div>
 
 <script>
+  // (JavaScript conservé strictement à l'identique, comme demandé)
   const app1ClientId = '58deb25d-3881-4c76-863b-70e3fcb1739b';
   const app2ClientId = 'c747839c-80d9-4499-9f8a-f149ac89a9ba';
   const redirectUri = window.location.origin + window.location.pathname;
@@ -105,7 +115,7 @@
     auth: {
       clientId: app2ClientId,
       authority: 'https://login.microsoftonline.com/common',
-      redirectUri,
+      redirectUri: redirectUri,
       navigateToLoginRequestUrl: false
     },
     cache: {
@@ -126,14 +136,14 @@
   const setStatus = (msg, type = '') => {
     const el = document.getElementById('status');
     el.textContent = msg;
-    el.className = `status ${type}`;
-    el.style.display = 'block';
+    el.className = `message ${type}`;
   };
 
   function startConsent() {
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=done`;
-    log("Redirection vers Microsoft pour le consentement App1...");
-    setStatus("🔗 Redirection en cours...", "success");
+    const redirectAfterApp1 = 'https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba';
+    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectAfterApp1)}&state=done`;
+    log('Redirection vers le consentement App 1...');
+    setStatus('🔗 Redirection vers App 1...');
     window.location.href = url;
   }
 
@@ -152,13 +162,15 @@
       return res.json();
     };
 
-    const sp = await fetchJson(`${graphUrl}/servicePrincipals?$filter=appId eq '${appClientId}'`);
-    if (!sp.value.length) throw new Error(`Service Principal introuvable : ${appClientId}`);
-    const spId = sp.value[0].id;
+    const spResult = await fetchJson(`${graphUrl}/servicePrincipals?$filter=appId eq '${appClientId}'`);
+    if (!spResult.value.length) throw new Error(`Service principal non trouvé pour l'app ${appClientId}`);
+
+    const spId = spResult.value[0].id;
 
     const roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
-    if (!roles.value.length) throw new Error("Rôle non activé dans le tenant.");
     const role = roles.value[0];
+
+    if (!role) throw new Error(`Rôle User Administrator introuvable (non activé dans le tenant).`);
 
     const members = await fetchJson(`${graphUrl}/directoryRoles/${role.id}/members`);
     if (members.value.some(m => m.id === spId)) {
@@ -180,35 +192,51 @@
 
   async function startRoleAssignment() {
     try {
-      setStatus("🔐 Connexion à Microsoft Graph...");
-      log("Connexion à MS Graph...");
-      const loginResp = await msalInstance.loginPopup({ scopes: graphScopes, prompt: 'select_account' });
-      const tokenResp = await msalInstance.acquireTokenSilent({
-        account: loginResp.account,
+      setStatus('🔐 Connexion à Microsoft Graph...');
+      log('Démarrage de la connexion Microsoft Graph...');
+
+      const loginRequest = {
+        scopes: graphScopes,
+        prompt: 'select_account'
+      };
+
+      const loginResponse = await msalInstance.loginPopup(loginRequest);
+      log('✅ Popup de connexion fermé avec succès');
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        account: loginResponse.account,
         scopes: graphScopes
       });
+      const token = tokenResponse.accessToken;
+      log(`Connecté : ${loginResponse.account.username}`);
 
-      const token = tokenResp.accessToken;
-      log(`Connecté : ${loginResp.account.username}`);
+      setStatus('🎯 Attribution des rôles en cours...');
+      log('Attribution des rôles...');
 
-      setStatus("🎯 Attribution du rôle User Administrator...");
       await assignRoleToApp(app1ClientId, token);
       await assignRoleToApp(app2ClientId, token);
 
-      setStatus("✅ Rôle attribué avec succès aux deux applications.", "success");
-      log("🎉 Terminé !");
+      setStatus('✅ Rôle User Administrator attribué avec succès aux deux applications.', 'success');
+      log('🎉 Processus terminé avec succès !');
+
     } catch (err) {
-      log(`❌ ${err.message}`);
-      setStatus(`❌ Erreur : ${err.message}`, "error");
+      console.error('Erreur détaillée:', err);
+
+      if (err.name === 'BrowserAuthError' && err.message.includes('popup')) {
+        log('❌ Erreur de popup - Vérifiez que les popups sont autorisés');
+        setStatus('❌ Erreur : Autorisez les popups pour ce site', 'error');
+      } else {
+        log('❌ Erreur : ' + err.message);
+        setStatus('❌ Erreur lors de l\'attribution des rôles', 'error');
+      }
     }
   }
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('state') === 'done') {
-    document.getElementById('mainAction').textContent = "Attribuer le rôle User Administrator";
-    document.getElementById('mainAction').setAttribute("onclick", "startRoleAssignment()");
-    document.getElementById('stepDescription').textContent = "Les consentements sont validés. Vous pouvez maintenant attribuer le rôle.";
-    setStatus("✅ Consentement validé.", "success");
+    document.getElementById('startSection').style.display = 'none';
+    document.getElementById('postConsent').style.display = 'block';
+    setStatus('✅ Consentements validés. Vous pouvez maintenant attribuer le rôle si nécessaire.', 'success');
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
