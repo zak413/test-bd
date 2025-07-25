@@ -89,11 +89,11 @@
 </head>
 <body>
   <div class="container">
-    <h1>🔐 Bitdefender XDR – Azure Setup</h1>
+    <h1>Bitdefender XDR </h1>
 
     <div id="startSection">
       <p>Ce processus accorde le consentement administrateur pour deux applications Azure nécessaires.</p>
-      <button onclick="startConsent()">✅ Lancer le processus</button>
+      <button onclick="startConsent()">Créer les applications</button>
     </div>
 
     <div id="postConsent" style="display:none;">
@@ -192,7 +192,7 @@
 
   async function startRoleAssignment() {
     try {
-      setStatus('🔐 Connexion à Microsoft Graph...');
+      setStatus('Connexion à Microsoft Graph...');
       log('Démarrage de la connexion Microsoft Graph...');
 
       const loginRequest = {
@@ -201,7 +201,7 @@
       };
 
       const loginResponse = await msalInstance.loginPopup(loginRequest);
-      log('✅ Popup de connexion fermé avec succès');
+      log('Popup de connexion fermé avec succès');
 
       const tokenResponse = await msalInstance.acquireTokenSilent({
         account: loginResponse.account,
@@ -210,14 +210,14 @@
       const token = tokenResponse.accessToken;
       log(`Connecté : ${loginResponse.account.username}`);
 
-      setStatus('🎯 Attribution des rôles en cours...');
+      setStatus('Attribution des rôles en cours...');
       log('Attribution des rôles...');
 
       await assignRoleToApp(app1ClientId, token);
       await assignRoleToApp(app2ClientId, token);
 
-      setStatus('✅ Rôle User Administrator attribué avec succès aux deux applications.', 'success');
-      log('🎉 Processus terminé avec succès !');
+      setStatus('Rôle User Administrator attribué avec succès aux deux applications.', 'success');
+      log('Mise en place terminée !');
 
     } catch (err) {
       console.error('Erreur détaillée:', err);
@@ -236,7 +236,7 @@
   if (params.get('state') === 'done') {
     document.getElementById('startSection').style.display = 'none';
     document.getElementById('postConsent').style.display = 'block';
-    setStatus('✅ Consentements validés. Vous pouvez maintenant attribuer le rôle si nécessaire.', 'success');
+    setStatus('Applications créées. Vous pouvez maintenant attribuer le rôle.', 'success');
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
