@@ -1,62 +1,13 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Consentement + Attribution de rôle – Deux Apps Azure</title>
-  <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 40px; max-width: 700px; margin: auto; }
-    h1 { color: #007acc; }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      background: #007acc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px 0;
-    }
-    .message { margin-top: 30px; font-size: 18px; }
-    .success { color: #28a745; }
-    .error { color: #dc3545; }
-    .log {
-      margin-top: 20px;
-      font-family: monospace;
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>🔐 Consentement + Attribution de rôle – Deux Applications Azure</h1>
-
-  <div id="startSection">
-    <p>Ce processus accorde le consentement administrateur pour deux applications.</p>
-    <button onclick="startConsent()">✅ Lancer le processus</button>
-  </div>
-
-  <div id="postConsent" style="display:none;">
-    <p>✅ Les deux consentements ont été accordés avec succès.</p>
-    <button onclick="startRoleAssignment()">🛠️ Attribuer le rôle User Administrator</button>
-  </div>
-
-  <div id="status" class="message"></div>
-  <div id="log" class="log">[INFO] Prêt...</div>
-
 <script>
   const app1ClientId = '58deb25d-3881-4c76-863b-70e3fcb1739b';
   const app2ClientId = 'c747839c-80d9-4499-9f8a-f149ac89a9ba';
+  const redirectUri = window.location.origin + window.location.pathname;
 
   const msalConfig = {
     auth: {
       clientId: app2ClientId,
       authority: 'https://login.microsoftonline.com/common',
-      redirectUri: 'https://zak413.github.io/test-bd/',
+      redirectUri: redirectUri,
       navigateToLoginRequestUrl: false
     },
     cache: {
@@ -64,6 +15,7 @@
       storeAuthStateInCookie: false
     }
   };
+
   const graphScopes = ['Directory.ReadWrite.All', 'RoleManagement.ReadWrite.Directory', 'Application.Read.All'];
   const msalInstance = new msal.PublicClientApplication(msalConfig);
 
@@ -80,7 +32,7 @@
   };
 
   function startConsent() {
-    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(msalConfig.auth.redirectUri)}&state=done`;
+    const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=done`;
     log('Redirection vers le consentement App 1...');
     setStatus('🔗 Redirection vers App 1...');
     window.location.href = url;
@@ -106,8 +58,8 @@
 
     const spId = spResult.value[0].id;
 
-    let roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
-    let role = roles.value[0];
+    const roles = await fetchJson(`${graphUrl}/directoryRoles?$filter=displayName eq 'User Administrator'`);
+    const role = roles.value[0];
 
     if (!role) throw new Error(`Rôle User Administrator introuvable (non activé dans le tenant).`);
 
