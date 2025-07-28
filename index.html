@@ -143,7 +143,7 @@
     const redirectAfterApp1 = 'https://login.microsoftonline.com/organizations/adminconsent?client_id=c747839c-80d9-4499-9f8a-f149ac89a9ba';
     const url = `https://login.microsoftonline.com/organizations/adminconsent?client_id=${app1ClientId}&redirect_uri=${encodeURIComponent(redirectAfterApp1)}&state=done`;
     log('Redirection vers le consentement App 1...');
-    setStatus('🔗 Redirection vers App 1...');
+    setStatus('Redirection vers App 1...');
     window.location.href = url;
   }
 
